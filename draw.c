@@ -118,7 +118,7 @@ void draw_polygons( struct matrix *polygons, screen s, zbuffer zb, color c ) {
     printf("Need at least 3 points to draw a polygon!\n");
     return;
   }
-  
+
   int point;
   double *normal;
 
@@ -598,20 +598,28 @@ void draw_line(int x0, int y0, double z0,
   int dy_east, dy_northeast, dx_east, dx_northeast, d_east, d_northeast;
   int loop_start, loop_end;
 
+  double z;
+  double dz;
+
   //swap points if going right -> left
   int xt, yt;
+  double zt;
   if (x0 > x1) {
     xt = x0;
     yt = y0;
+    zt = z0;
     x0 = x1;
     y0 = y1;
     z0 = z1;
     x1 = xt;
     y1 = yt;
+    z1 = zt;
   }
+
 
   x = x0;
   y = y0;
+  z = z0;
   A = 2 * (y1 - y0);
   B = -2 * (x1 - x0);
   int wide = 0;
@@ -621,6 +629,7 @@ void draw_line(int x0, int y0, double z0,
     wide = 1;
     loop_start = x;
     loop_end = x1;
+    dz /= x1 - x0;
     dx_east = dx_northeast = 1;
     dy_east = 0;
     d_east = A;
@@ -657,9 +666,11 @@ void draw_line(int x0, int y0, double z0,
     }
   }
 
+  dz = (z1 - z0) / (loop_end - loop_start);
+
   while ( loop_start < loop_end ) {
 
-    plot( s, zb, c, x, y, 0);
+    plot( s, zb, c, x, y, z);
     if ( (wide && ((A > 0 && d > 0) ||
                    (A < 0 && d < 0)))
          ||
@@ -674,7 +685,8 @@ void draw_line(int x0, int y0, double z0,
       y+= dy_east;
       d+= d_east;
     }
+    z += dz;
     loop_start++;
   } //end drawing loop
-  plot( s, zb, c, x1, y1, 0 );
+  plot( s, zb, c, x1, y1, z1);
 } //end draw_line
