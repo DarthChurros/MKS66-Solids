@@ -26,11 +26,11 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
 
   int hi = i * 3;
   int lo = i * 3;
-  int mid;
+  int mid = i * 3;
 
   hi += (((yvals[0] > yvals[1]) ? yvals[0] : yvals[1]) > yvals[2]) ? (yvals[0] > yvals[1]) ? 0 : 1 : 2;
   lo += (((yvals[0] < yvals[1]) ? yvals[0] : yvals[1]) < yvals[2]) ? (yvals[0] < yvals[1]) ? 0 : 1 : 2;
-  mid = (i*3 == hi || i*3 == lo) ? (i*3+1 == hi || i*3+1 == lo) ? 2 : 1 : 0;
+  mid += (mid == hi || mid == lo) ? (mid+1 == hi || mid+1 == lo) ? 2 : 1 : 0;
 
   double y0 = points->m[1][lo];
   double y1 = points->m[1][hi];
@@ -55,6 +55,7 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
   double z_a = z0;
   double z_b = z0;
 
+
   while (y < y_mid) {
     draw_line(x_a, y, z_a, x_b, y, z_b, s, zb, c);
     x_a += dx_dir;
@@ -66,6 +67,7 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
 
   x_b = x_mid;
   z_b = z_mid;
+  y = y_mid;
 
   while (y < y1) {
     draw_line(x_a, y, z_a, x_b, y, z_b, s, zb, c);
@@ -116,7 +118,7 @@ void draw_polygons( struct matrix *polygons, screen s, zbuffer zb, color c ) {
     printf("Need at least 3 points to draw a polygon!\n");
     return;
   }
-
+  
   int point;
   double *normal;
 
@@ -126,27 +128,28 @@ void draw_polygons( struct matrix *polygons, screen s, zbuffer zb, color c ) {
 
     if ( normal[2] > 0 ) {
 
-      draw_line( polygons->m[0][point],
-                 polygons->m[1][point],
-                 polygons->m[2][point],
-                 polygons->m[0][point+1],
-                 polygons->m[1][point+1],
-                 polygons->m[2][point+1],
-                 s, zb, c);
-      draw_line( polygons->m[0][point+2],
-                 polygons->m[1][point+2],
-                 polygons->m[2][point+2],
-                 polygons->m[0][point+1],
-                 polygons->m[1][point+1],
-                 polygons->m[2][point+1],
-                 s, zb, c);
-      draw_line( polygons->m[0][point],
-                 polygons->m[1][point],
-                 polygons->m[2][point],
-                 polygons->m[0][point+2],
-                 polygons->m[1][point+2],
-                 polygons->m[2][point+2],
-                 s, zb, c);
+      // draw_line( polygons->m[0][point],
+      //            polygons->m[1][point],
+      //            polygons->m[2][point],
+      //            polygons->m[0][point+1],
+      //            polygons->m[1][point+1],
+      //            polygons->m[2][point+1],
+      //            s, zb, c);
+      // draw_line( polygons->m[0][point+2],
+      //            polygons->m[1][point+2],
+      //            polygons->m[2][point+2],
+      //            polygons->m[0][point+1],
+      //            polygons->m[1][point+1],
+      //            polygons->m[2][point+1],
+      //            s, zb, c);
+      // draw_line( polygons->m[0][point],
+      //            polygons->m[1][point],
+      //            polygons->m[2][point],
+      //            polygons->m[0][point+2],
+      //            polygons->m[1][point+2],
+      //            polygons->m[2][point+2],
+      //            s, zb, c);
+      scanline_convert(polygons, point / 3, s, zb);
     }
   }
 }
